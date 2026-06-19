@@ -393,6 +393,37 @@
     padding:10px 20px; background:rgba(255,250,240,.1); border:1px solid rgba(182,86,47,.4); color:#e8c89a;
   }
 
+  /* LIKE BUTTON */
+  .like-bar{
+    display:flex; align-items:center; gap:18px; margin-top:40px;
+  }
+  .like-btn{
+    display:flex; align-items:center; gap:10px;
+    background:#fffaf0; border:2px solid var(--ink);
+    padding:12px 22px; cursor:pointer; font-family:'Space Mono',monospace; font-size:13px;
+    box-shadow:6px 6px 0 var(--ink);
+    transition:transform .15s, box-shadow .15s;
+    -webkit-tap-highlight-color:transparent; user-select:none;
+  }
+  .like-btn:hover{transform:translate(-3px,-3px); box-shadow:9px 9px 0 var(--ink);}
+  .like-btn:active{transform:translate(3px,3px); box-shadow:3px 3px 0 var(--ink);}
+  .like-btn.liked{
+    background:var(--copper); color:#fff7ea; border-color:var(--copper-deep);
+    box-shadow:6px 6px 0 var(--copper-deep);
+  }
+  .like-btn.liked:hover{box-shadow:9px 9px 0 var(--copper-deep);}
+  .like-btn.pop{animation:likePop .4s cubic-bezier(.36,.07,.19,.97);}
+  @keyframes likePop{
+    0%  {transform:scale(1);}
+    30% {transform:scale(.88);}
+    65% {transform:scale(1.18);}
+    100%{transform:scale(1);}
+  }
+  .like-heart{font-size:20px; line-height:1; transition:transform .2s;}
+  .like-btn.liked .like-heart{transform:scale(1.2);}
+  .like-count{font-weight:700; font-size:15px; min-width:28px;}
+  .like-label{font-size:11px; text-transform:uppercase; letter-spacing:.08em; color:#8a8270;}
+
   footer{padding:40px 0; font-size:12px; color:#8a8270; border-top:2px solid var(--ink);}
   .disclaimer{max-width:680px; margin-top:10px; line-height:1.5;}
 </style>
@@ -412,6 +443,13 @@
           <div><span>Network</span>Ethereum (ERC-20)</div>
           <div><span>Decimals</span>18</div>
           <div><span>Status</span>Pre-launch</div>
+        </div>
+        <div class="like-bar">
+          <button class="like-btn" id="likeBtn" onclick="toggleLike()">
+            <span class="like-heart" id="likeHeart">🤍</span>
+            <span class="like-count" id="likeCount">0</span>
+          </button>
+          <span class="like-label" id="likeLabel">Like this page</span>
         </div>
       </div>
       <div class="coin-stage">
@@ -582,6 +620,44 @@
 </div>
 
 <script>
+  /* ── LIKE ── */
+  var BASE_LIKES = 412; // seed count so it never shows 0
+  var liked = localStorage.getItem('dno_liked') === '1';
+  var extraLikes = parseInt(localStorage.getItem('dno_likes') || BASE_LIKES, 10);
+
+  function renderLike() {
+    var btn   = document.getElementById('likeBtn');
+    var heart = document.getElementById('likeHeart');
+    var count = document.getElementById('likeCount');
+    var label = document.getElementById('likeLabel');
+    if (liked) {
+      btn.classList.add('liked');
+      heart.textContent = '❤️';
+      label.textContent = 'You liked this!';
+    } else {
+      btn.classList.remove('liked');
+      heart.textContent = '🤍';
+      label.textContent = 'Like this page';
+    }
+    count.textContent = extraLikes;
+  }
+
+  function toggleLike() {
+    var btn = document.getElementById('likeBtn');
+    liked = !liked;
+    extraLikes = liked ? extraLikes + 1 : extraLikes - 1;
+    localStorage.setItem('dno_liked', liked ? '1' : '0');
+    localStorage.setItem('dno_likes', extraLikes);
+    btn.classList.remove('pop');
+    void btn.offsetWidth;
+    btn.classList.add('pop');
+    btn.addEventListener('animationend', function h(){ btn.classList.remove('pop'); btn.removeEventListener('animationend',h); });
+    renderLike();
+  }
+
+  document.addEventListener('DOMContentLoaded', renderLike);
+
+  /* ── TAP ── */
   var taps = 0;
 
   function tapCoin(e) {
