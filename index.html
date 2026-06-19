@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Danno Coin (DNO)</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700;9..144,900&family=Space+Mono:wght@400;700&display=swap');
+
+  :root{
+    --ink:#1c1a16;
+    --paper:#f1ece1;
+    --copper:#b6562f;
+    --copper-deep:#8a3e1f;
+    --copper-light:#e8a06b;
+    --moss:#5c6b4f;
+    --line:#d8cdb8;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{
+    background:
+      radial-gradient(ellipse at top, #f8f3e8 0%, var(--paper) 60%);
+    color:var(--ink);
+    font-family:'Space Mono', monospace;
+    line-height:1.6;
+    perspective:1400px;
+    overflow-x:hidden;
+  }
+  h1,h2,h3{font-family:'Fraunces', serif;}
+  .wrap{max-width:980px; margin:0 auto; padding:0 24px;}
+
+  /* HERO */
+  .hero{
+    padding:64px 0 56px;
+    position:relative;
+  }
+  .eyebrow{
+    font-size:13px; letter-spacing:.12em; text-transform:uppercase;
+    color:var(--copper-deep); margin-bottom:18px; display:flex; align-items:center; gap:10px;
+  }
+  .eyebrow::before{
+    content:""; width:8px; height:8px; background:var(--copper); border-radius:50%;
+    display:inline-block; animation:pulse 1.8s infinite; box-shadow:0 0 0 4px rgba(182,86,47,.2);
+  }
+  @keyframes pulse{0%,100%{opacity:1;}50%{opacity:.35;}}
+  h1{
+    font-size:clamp(48px, 9vw, 100px);
+    font-weight:900;
+    letter-spacing:-0.02em;
+    line-height:0.92;
+    text-shadow:
+      1px 1px 0 var(--copper-light),
+      3px 3px 0 var(--copper),
+      6px 6px 0 var(--copper-deep),
+      9px 9px 0 #6e3018,
+      12px 12px 0 #4a2010,
+      18px 18px 30px rgba(28,26,22,.45);
+    transform:rotateX(14deg) rotateY(-7deg) scale(1.02);
+    transform-style:preserve-3d;
+  }
+  h1 .sym{
+    color:#fff7ea; -webkit-text-stroke:1.5px var(--copper-deep);
+    font-style:italic; font-weight:500;
+  }
+  .tagline{
+    margin-top:26px; max-width:560px; font-size:16px; color:#3a362e;
+  }
+  .hero-meta{
+    margin-top:36px; display:flex; flex-wrap:wrap; gap:14px;
+  }
+  .hero-meta div{
+    background:#fffaf0; border:1px solid var(--ink);
+    padding:10px 16px;
+    box-shadow:8px 8px 0 var(--ink);
+    transform:rotate(-3deg);
+    font-size:13px;
+    transition:transform .2s ease, box-shadow .2s ease;
+  }
+  .hero-meta div:nth-child(even){transform:rotate(3deg);}
+  .hero-meta div:hover{transform:translate(-4px,-4px) rotate(0deg); box-shadow:12px 12px 0 var(--copper);}
+  .hero-meta div span{display:block; color:#8a8270; font-size:11px; text-transform:uppercase; letter-spacing:.08em; margin-bottom:4px;}
+
+  .hero-grid{display:grid; grid-template-columns:1fr 300px; gap:40px; align-items:center;}
+  @media(max-width:760px){.hero-grid{grid-template-columns:1fr;}}
+
+  .coin-stage{display:flex; flex-direction:column; align-items:center; gap:22px;}
+  .coin{
+    width:230px; height:230px; position:relative;
+    transform-style:preserve-3d;
+    animation:spin 9s linear infinite;
+    filter:drop-shadow(0 46px 30px rgba(28,26,22,.5));
+  }
+  @media (prefers-reduced-motion: reduce){.coin{animation:none;}}
+  @keyframes spin{
+    from{transform:rotateY(0deg) rotateX(10deg);}
+    to{transform:rotateY(360deg) rotateX(10deg);}
+  }
+  .coin-edge{
+    position:absolute; inset:0; border-radius:50%;
+    background:repeating-conic-gradient(var(--copper-deep) 0deg 4deg, var(--copper-light) 4deg 8deg);
+    transform:translateZ(-10px) scale(0.97);
+  }
+  .coin-face{
+    position:absolute; inset:0; border-radius:50%;
+    background:
+      radial-gradient(circle at 32% 28%, #f3c190 0%, var(--copper-light) 22%, var(--copper) 50%, var(--copper-deep) 82%, #4a2010 100%);
+    border:7px solid #f2d9b8;
+    box-shadow:
+      inset 0 0 0 2px var(--copper-deep),
+      inset 0 18px 34px rgba(255,255,255,.4),
+      inset 0 -22px 34px rgba(0,0,0,.4);
+    backface-visibility:hidden;
+    display:flex; align-items:center; justify-content:center;
+    transform:translateZ(10px);
+  }
+  .coin-face.back{transform:rotateY(180deg) translateZ(10px);}
+  .coin-face .glyph{
+    font-family:'Fraunces',serif; font-weight:900; font-size:68px; color:#fff7ea;
+    text-shadow:0 3px 0 rgba(0,0,0,.3), 0 6px 10px rgba(0,0,0,.25);
+  }
+  .status-badges{display:flex; flex-direction:column; gap:10px; width:100%;}
+  .status-pill{
+    display:flex; align-items:center; justify-content:space-between; gap:10px;
+    font-size:11px; letter-spacing:.04em; padding:9px 14px;
+    border:1px solid var(--ink); background:#efe7d5;
+    box-shadow:3px 3px 0 var(--ink);
+  }
+  .status-pill .dot{width:7px; height:7px; border-radius:50%; background:#b5a98c; flex:none;}
+
+  /* SECTION HEADERS */
+  section{padding:64px 0;}
+  .sec-label{
+    font-size:12px; letter-spacing:.1em; text-transform:uppercase; color:var(--copper-deep);
+    margin-bottom:10px;
+  }
+  section h2{
+    font-size:clamp(28px,4vw,40px); margin-bottom:34px; font-weight:700;
+    text-shadow:2px 2px 0 var(--line), 4px 4px 0 rgba(182,86,47,.25);
+  }
+
+  /* TOKENOMICS — 3D bars */
+  .tokenomics-grid{
+    display:grid; grid-template-columns: 1.15fr 1fr; gap:48px; align-items:start;
+  }
+  @media(max-width:680px){.tokenomics-grid{grid-template-columns:1fr;}}
+
+  .bar-chart{
+    display:flex; align-items:flex-end; gap:22px; height:240px;
+    padding:0 10px 0 0; transform:rotateX(18deg) rotateY(6deg) scale(0.96); transform-style:preserve-3d;
+  }
+  .bar-col{display:flex; flex-direction:column; align-items:center; gap:10px; flex:1;}
+  .bar-3d{
+    width:100%; max-width:54px; position:relative;
+    transform-style:preserve-3d;
+  }
+  .bar-front{
+    width:100%; background:linear-gradient(180deg, var(--copper-light), var(--copper));
+    border:2px solid var(--ink); position:relative; z-index:2;
+  }
+  .bar-side{
+    position:absolute; top:0; right:-14px; width:14px; height:100%;
+    background:var(--copper-deep); border:2px solid var(--ink); border-left:none;
+    transform:skewY(45deg); transform-origin:top left; z-index:1;
+  }
+  .bar-top{
+    position:absolute; top:-14px; left:0; width:100%; height:14px;
+    background:var(--copper-light); border:2px solid var(--ink); border-bottom:none;
+    transform:skewX(-45deg); transform-origin:bottom left; z-index:1;
+  }
+  .bar-col:nth-child(2) .bar-front{background:linear-gradient(180deg,#8fa07f, var(--moss));}
+  .bar-col:nth-child(2) .bar-side{background:#46512e;}
+  .bar-col:nth-child(2) .bar-top{background:#8fa07f;}
+  .bar-col:nth-child(3) .bar-front{background:linear-gradient(180deg,#4a473d, var(--ink));}
+  .bar-col:nth-child(3) .bar-side{background:#0d0c0a;}
+  .bar-col:nth-child(3) .bar-top{background:#4a473d;}
+  .bar-col:nth-child(4) .bar-front{background:linear-gradient(180deg,#a8552f, var(--copper-deep));}
+  .bar-col:nth-child(4) .bar-side{background:#5e2812;}
+  .bar-col:nth-child(4) .bar-top{background:#a8552f;}
+  .bar-label{font-size:11px; text-align:center;}
+  .bar-pct{font-family:'Fraunces',serif; font-weight:700; font-size:18px; color:var(--copper-deep);}
+
+  .supply-card{
+    border:2px solid var(--ink); padding:28px; background:#fffaf0;
+    box-shadow:16px 16px 0 var(--copper), 16px 16px 0 1px var(--ink);
+    transform:rotate(2.5deg);
+  }
+  .supply-card .big{font-family:'Fraunces',serif; font-size:36px; font-weight:700; color:var(--copper-deep);}
+  .supply-card p{font-size:13px; color:#5a5546; margin-top:6px;}
+  .supply-card hr{border:none; border-top:1px solid var(--line); margin:16px 0;}
+
+  /* ROADMAP — stacked 3D blocks */
+  .roadmap{display:grid; grid-template-columns:repeat(2,1fr); gap:26px;}
+  @media(max-width:680px){.roadmap{grid-template-columns:1fr;}}
+  .phase{
+    position:relative; background:#fffaf0; border:2px solid var(--ink);
+    padding:22px 20px 20px;
+    box-shadow:14px 14px 0 var(--ink);
+    transform:perspective(600px) rotateX(6deg) rotateY(-2deg);
+    transition:transform .25s ease, box-shadow .25s ease;
+  }
+  .phase:hover{transform:perspective(600px) rotateX(0deg) rotateY(0deg) translateY(-8px); box-shadow:18px 20px 0 var(--copper);}
+  .phase .num{
+    position:absolute; top:-18px; left:-14px; width:42px; height:42px;
+    background:var(--copper); color:#fff7ea; border:2px solid var(--ink);
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Fraunces',serif; font-weight:900; font-size:18px;
+    box-shadow:3px 3px 0 var(--ink); transform:rotate(-6deg);
+  }
+  .phase .when{font-size:12px; text-transform:uppercase; letter-spacing:.08em; color:var(--copper-deep); margin-bottom:6px; margin-top:6px;}
+  .phase h3{font-size:20px; margin-bottom:6px;}
+  .phase p{font-size:14px; color:#4a4638;}
+
+  /* CONTRACT / CERT */
+  .contract-box{
+    border:2px dashed var(--ink); padding:24px; font-size:13px; background:#efe7d5;
+    box-shadow:6px 6px 0 var(--line);
+    transform:rotate(-0.6deg);
+  }
+  .contract-box .label{font-size:11px; text-transform:uppercase; letter-spacing:.08em; color:var(--copper-deep); margin-bottom:6px;}
+  .pending-tag{
+    display:inline-block; margin-top:12px; font-size:11px; background:var(--ink); color:var(--paper);
+    padding:4px 10px; letter-spacing:.05em;
+    box-shadow:3px 3px 0 var(--copper);
+  }
+
+  footer{padding:40px 0; font-size:12px; color:#8a8270; border-top:2px solid var(--ink);}
+  .disclaimer{max-width:680px; margin-top:10px; line-height:1.5;}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <section class="hero">
+    <div class="eyebrow">Token launch · Ethereum (ERC-20)</div>
+    <h1>Danno<br><span class="sym">DNO</span></h1>
+    <div class="hero-grid">
+      <div>
+        <p class="tagline">A community-driven token built on Ethereum. This page tracks Danno Coin's tokenomics, rollout plan, and on-chain verification as it moves toward deployment.</p>
+        <div class="hero-meta">
+          <div><span>Symbol</span>DNO</div>
+          <div><span>Network</span>Ethereum (ERC-20)</div>
+          <div><span>Decimals</span>18</div>
+          <div><span>Status</span>Pre-launch</div>
+        </div>
+      </div>
+      <div class="coin-stage">
+        <div class="coin">
+          <div class="coin-edge"></div>
+          <div class="coin-face front"><span class="glyph">D</span></div>
+          <div class="coin-face back"><span class="glyph">N</span></div>
+        </div>
+        <div class="status-badges">
+          <div class="status-pill"><span><span class="dot"></span> Contract verification</span><span>Pending</span></div>
+          <div class="status-pill"><span><span class="dot"></span> Third-party audit</span><span>Pending</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-label">Distribution</div>
+    <h2>Tokenomics</h2>
+    <div class="tokenomics-grid">
+      <div class="bar-chart">
+        <div class="bar-col">
+          <div class="bar-pct">40%</div>
+          <div class="bar-3d" style="height:160px;">
+            <div class="bar-front" style="height:160px;"></div>
+            <div class="bar-side" style="height:160px;"></div>
+            <div class="bar-top"></div>
+          </div>
+          <div class="bar-label">Public<br>sale</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-pct">25%</div>
+          <div class="bar-3d" style="height:100px;">
+            <div class="bar-front" style="height:100px;"></div>
+            <div class="bar-side" style="height:100px;"></div>
+            <div class="bar-top"></div>
+          </div>
+          <div class="bar-label">Liquidity</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-pct">15%</div>
+          <div class="bar-3d" style="height:60px;">
+            <div class="bar-front" style="height:60px;"></div>
+            <div class="bar-side" style="height:60px;"></div>
+            <div class="bar-top"></div>
+          </div>
+          <div class="bar-label">Team</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-pct">20%</div>
+          <div class="bar-3d" style="height:80px;">
+            <div class="bar-front" style="height:80px;"></div>
+            <div class="bar-side" style="height:80px;"></div>
+            <div class="bar-top"></div>
+          </div>
+          <div class="bar-label">Treasury</div>
+        </div>
+      </div>
+      <div class="supply-card">
+        <div class="big">1,000,000,000</div>
+        <p>Total fixed supply of DNO. No further minting after deployment.</p>
+        <hr>
+        <p>Team allocation locked for 12 months, vesting linearly over the following 12. Liquidity locked at launch.</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-label">Rollout</div>
+    <h2>Roadmap</h2>
+    <div class="roadmap">
+      <div class="phase">
+        <div class="num">01</div>
+        <div class="when">Foundation</div>
+        <h3>Contract & audit</h3>
+        <p>Finalize ERC-20 contract, complete third-party audit, publish source on Etherscan.</p>
+      </div>
+      <div class="phase">
+        <div class="num">02</div>
+        <div class="when">Liquidity</div>
+        <h3>Deployment & DEX listing</h3>
+        <p>Deploy contract, lock liquidity, list on a decentralized exchange.</p>
+      </div>
+      <div class="phase">
+        <div class="num">03</div>
+        <div class="when">Growth</div>
+        <h3>Community & utility</h3>
+        <p>Expand holder base, ship first utility integration, open governance discussions.</p>
+      </div>
+      <div class="phase">
+        <div class="num">04</div>
+        <div class="when">Expansion</div>
+        <h3>Exchange listings</h3>
+        <p>Pursue centralized exchange listings and broader partnerships.</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="sec-label">Verification</div>
+    <h2>Contract & audit</h2>
+    <div class="contract-box">
+      <div class="label">Contract address</div>
+      To be added once DNO is deployed and verified on Etherscan.
+      <div class="pending-tag">Pending deployment</div>
+    </div>
+  </section>
+
+  <footer>
+    <div>© 2026 Danno Coin (DNO)</div>
+    <p class="disclaimer">Danno Coin is not yet deployed. Figures above are a proposed structure and will be updated with the verified contract address, audit report, and Etherscan link once live. This page is not a regulatory license or legal certificate. Cryptocurrency carries risk — do your own research.</p>
+  </footer>
+</div>
+
+</body>
+</html>
