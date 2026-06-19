@@ -1,0 +1,13 @@
+{
+  "id": "gemini-pro",
+  "label": "Gemini Pro",
+  "website": "https://ai.google.dev/gemini-api",
+  "iconUrl": "https://icons.duckduckgo.com/ip3/ai.google.dev.ico",
+  "countryHQ": "US",
+  "twitter": "GoogleDeepMind",
+  "developerPortalUrl": "https://ai.google.dev/gemini-api/docs",
+  "description": "Google Gemini Pro is a multimodal AI model for understanding and generating text, code, and data — usable in fintech and banking applications via the Gemini API.",
+  "marketFocus": "Global",
+  "verified": false,
+  "note": "Gemini Pro is a large language model from Google DeepMind, accessible via the Gemini API. It can be integrated into financial services applications for tasks such as document analysis, transaction categorisation, customer support automation, and compliance review. Listed for AI-powered fintech tooling discovery (not an open banking account aggregator)."
+}
