@@ -393,6 +393,20 @@
     padding:10px 20px; background:rgba(255,250,240,.1); border:1px solid rgba(182,86,47,.4); color:#e8c89a;
   }
 
+  /* TELEGRAM BUTTON */
+  .tg-btn{
+    display:inline-flex; align-items:center; gap:9px;
+    background:#229ED9; color:#fff; text-decoration:none;
+    font-family:'Space Mono',monospace; font-size:12px; font-weight:700;
+    letter-spacing:.04em; padding:12px 20px;
+    border:2px solid #1a7dab;
+    box-shadow:5px 5px 0 #1a7dab;
+    transition:transform .15s, box-shadow .15s;
+    margin-top:16px; display:inline-flex;
+  }
+  .tg-btn:hover{transform:translate(-3px,-3px); box-shadow:8px 8px 0 #1a7dab;}
+  .tg-btn:active{transform:translate(2px,2px); box-shadow:3px 3px 0 #1a7dab;}
+
   /* LIKE BUTTON */
   .like-bar{
     display:flex; align-items:center; gap:18px; margin-top:40px;
@@ -451,6 +465,10 @@
           </button>
           <span class="like-label" id="likeLabel">Like this page</span>
         </div>
+        <a class="tg-btn" href="https://t.me/DannoToken_bot" target="_blank" rel="noopener">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 8.248-2.012 9.487c-.145.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12L7.48 14.307l-2.95-.924c-.641-.2-.654-.641.136-.953l11.527-4.448c.537-.194 1.006.131.37.266z"/></svg>
+          Join @DannoToken_bot
+        </a>
       </div>
       <div class="coin-stage">
         <div class="coin-scene" style="position:relative;" id="coinScene" onclick="tapCoin(event)">
@@ -508,6 +526,11 @@
           <div class="chip"><span>% of supply</span>5%</div>
           <div class="chip"><span>Network</span>Ethereum ERC-20</div>
         </div>
+
+        <p class="giveaway-sub" style="margin-top:10px; font-size:12px;">
+          Follow live updates on Telegram →
+          <a href="https://t.me/DannoToken_bot" target="_blank" rel="noopener" style="color:var(--copper-light); text-decoration:underline;">@DannoToken_bot</a>
+        </p>
 
         <form class="email-form" onsubmit="return handleEmail(event)">
           <input type="email" id="emailInput" placeholder="your@email.com" required autocomplete="email">

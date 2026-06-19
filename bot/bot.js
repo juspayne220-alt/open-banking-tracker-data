@@ -59,9 +59,13 @@ app.listen(PORT, () => console.log(`DNO API running on port ${PORT}`));
 
 /* ── bot commands ── */
 
+const BOT_USERNAME = 'DannoToken_bot';
+
 const MENU = `
 🪙 *Danno Coin (DNO)*
 _Community-driven ERC-20 on Ethereum_
+
+Welcome to @${BOT_USERNAME} — your live feed for everything DNO.
 
 Pick a command:
 /stats        — live giveaway & like count
