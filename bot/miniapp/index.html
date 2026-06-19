@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Danno Coin (DNO)</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,700;9..144,900&family=Space+Mono:wght@400;700&display=swap');
+
+  :root {
+    --copper:#b6562f;
+    --copper-deep:#8a3e1f;
+    --copper-light:#e8a06b;
+    --gold:#f5c842;
+    --bg: var(--tg-theme-bg-color, #1c1a16);
+    --text: var(--tg-theme-text-color, #f1ece1);
+    --hint: var(--tg-theme-hint-color, #8a8270);
+    --btn: var(--tg-theme-button-color, #b6562f);
+    --btn-text: var(--tg-theme-button-text-color, #fff7ea);
+    --secondary-bg: var(--tg-theme-secondary-bg-color, #2a2520);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Space Mono', monospace;
+    font-size: 13px;
+    line-height: 1.5;
+    overscroll-behavior: none;
+    min-height: 100vh;
+    padding-bottom: 80px;
+  }
+
+  h1,h2,h3 { font-family: 'Fraunces', serif; }
+
+  /* ── HEADER ── */
+  .header {
+    background: var(--secondary-bg);
+    padding: 20px 20px 0;
+    text-align: center;
+    position: relative;
+  }
+
+  .eyebrow {
+    font-size: 10px; letter-spacing: .12em; text-transform: uppercase;
+    color: var(--copper-light); margin-bottom: 12px;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+  }
+  .eyebrow::before {
+    content:""; width:6px; height:6px; border-radius:50%;
+    background: var(--copper); display:inline-block;
+    animation: pulse 1.8s infinite;
+    box-shadow: 0 0 0 3px rgba(182,86,47,.25);
+  }
+  @keyframes pulse{0%,100%{opacity:1;}50%{opacity:.3;}}
+
+  .logo {
+    font-size: 64px; font-weight: 900; line-height: .9;
+    color: var(--text);
+    text-shadow:
+      1px 1px 0 var(--copper-light),
+      3px 3px 0 var(--copper),
+      6px 6px 0 var(--copper-deep),
+      10px 10px 20px rgba(0,0,0,.5);
+    letter-spacing: -0.02em;
+  }
+  .logo .sym {
+    color: var(--copper-light); font-style: italic; font-weight: 700;
+    -webkit-text-stroke: 1px var(--copper-deep);
+  }
+
+  /* ── COIN ── */
+  .coin-wrap {
+    display: flex; flex-direction: column; align-items: center;
+    padding: 28px 0 20px; background: var(--secondary-bg);
+  }
+  .coin-scene { width: 160px; height: 160px; perspective: 500px; cursor: pointer; }
+  .coin-inner {
+    width: 100%; height: 100%; position: relative;
+    transform-style: preserve-3d;
+    animation: spin 6s ease-in-out infinite;
+  }
+  .coin-inner.tap { animation: spin 6s ease-in-out infinite, tapPop .35s cubic-bezier(.36,.07,.19,.97); }
+  @keyframes tapPop {
+    0%{transform:scale(1);}20%{transform:scale(.8) rotate(-8deg);}
+    60%{transform:scale(1.2) rotate(5deg);}100%{transform:scale(1);}
+  }
+  @keyframes spin {
+    0%  { transform: rotateY(0deg)   rotateX(10deg); }
+    25% { transform: rotateY(90deg)  rotateX(-6deg); }
+    50% { transform: rotateY(180deg) rotateX(14deg); }
+    75% { transform: rotateY(270deg) rotateX(-4deg); }
+    100%{ transform: rotateY(360deg) rotateX(10deg); }
+  }
+  .ring {
+    position:absolute; inset:0; border-radius:50%;
+    background: repeating-conic-gradient(var(--copper-deep) 0deg 3deg, var(--copper) 3deg 6deg, var(--copper-light) 6deg 9deg, var(--copper) 9deg 12deg);
+  }
+  .ring-1{transform:translateZ(-20px);}
+  .ring-2{transform:translateZ(-12px);filter:brightness(.85);}
+  .ring-3{transform:translateZ(-5px); filter:brightness(.92);}
+  .face {
+    position: absolute; inset: 0; border-radius: 50%;
+    background: radial-gradient(circle at 28% 22%, #ffe4b5 0%, var(--copper-light) 28%, var(--copper) 52%, var(--copper-deep) 80%, #3a1a0a 100%);
+    border: 6px solid #f5ddb0;
+    box-shadow:
+      inset 0 20px 40px rgba(255,255,255,.5),
+      inset 0 -24px 40px rgba(0,0,0,.55);
+    backface-visibility: hidden;
+    display: flex; align-items: center; justify-content: center;
+    transform: translateZ(0);
+  }
+  .face.back { transform: rotateY(180deg) translateZ(0); }
+  .face .g {
+    font-family: 'Fraunces', serif; font-weight: 900; font-size: 52px;
+    color: #fff7ea;
+    text-shadow: 0 3px 0 rgba(0,0,0,.4), 0 0 30px rgba(255,220,140,.7);
+    animation: glow 3s ease-in-out infinite;
+  }
+  @keyframes glow {
+    0%,100%{text-shadow:0 3px 0 rgba(0,0,0,.4),0 0 30px rgba(255,220,140,.6);}
+    50%{text-shadow:0 3px 0 rgba(0,0,0,.4),0 0 60px rgba(255,220,140,.95);}
+  }
+
+  .tap-info { text-align: center; margin-top: 10px; }
+  .tap-hint { font-size: 10px; text-transform: uppercase; letter-spacing: .1em; color: var(--hint); }
+  .tap-count { font-family: 'Fraunces', serif; font-size: 22px; font-weight: 700; color: var(--copper-light); }
+
+  /* ── TABS ── */
+  .tabs {
+    display: flex; background: var(--secondary-bg);
+    border-top: 1px solid rgba(255,255,255,.06);
+    position: sticky; top: 0; z-index: 10;
+  }
+  .tab {
+    flex: 1; padding: 12px 4px; text-align: center; font-size: 10px;
+    letter-spacing: .06em; text-transform: uppercase; color: var(--hint);
+    cursor: pointer; border-bottom: 2px solid transparent;
+    transition: color .15s, border-color .15s;
+  }
+  .tab.active { color: var(--copper-light); border-bottom-color: var(--copper); }
+
+  /* ── PANELS ── */
+  .panel { display: none; padding: 20px; }
+  .panel.active { display: block; }
+
+  /* ── STATS CARDS ── */
+  .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+  .stat-card {
+    background: var(--secondary-bg);
+    border: 1px solid rgba(182,86,47,.3);
+    padding: 14px 12px;
+    box-shadow: 3px 3px 0 rgba(138,62,31,.5);
+  }
+  .stat-card .label { font-size: 9px; text-transform: uppercase; letter-spacing: .1em; color: var(--hint); margin-bottom: 4px; }
+  .stat-card .value { font-family: 'Fraunces', serif; font-size: 22px; font-weight: 700; color: var(--copper-light); line-height: 1; }
+  .stat-card .sub { font-size: 9px; color: var(--hint); margin-top: 2px; }
+
+  /* ── GIVEAWAY PANEL ── */
+  .giveaway-hero {
+    background: linear-gradient(135deg, #2a1a0e 0%, #3a2010 50%, #2a1a0e 100%);
+    border: 1px solid var(--copper);
+    padding: 24px 16px;
+    text-align: center;
+    margin-bottom: 16px;
+    position: relative; overflow: hidden;
+  }
+  .giveaway-hero::before {
+    content:""; position:absolute; inset:-40px;
+    background: repeating-linear-gradient(45deg, transparent, transparent 20px, rgba(182,86,47,.06) 20px, rgba(182,86,47,.06) 22px);
+    animation: gridMove 8s linear infinite;
+  }
+  @keyframes gridMove{from{transform:translate(0,0);}to{transform:translate(44px,44px);}}
+  .giveaway-hero > * { position: relative; z-index: 1; }
+  .giveaway-badge {
+    display: inline-block; background: var(--copper); color: #fff7ea;
+    font-size: 9px; letter-spacing: .12em; text-transform: uppercase;
+    padding: 4px 12px; margin-bottom: 14px;
+    animation: bounce 2s ease-in-out infinite;
+  }
+  @keyframes bounce{0%,100%{transform:translateY(0);}50%{transform:translateY(-5px);}}
+  .giveaway-amount {
+    font-family: 'Fraunces', serif; font-weight: 900; font-size: 42px; line-height: .9;
+    color: #fff7ea;
+    text-shadow: 2px 2px 0 var(--copper-light), 4px 4px 0 var(--copper), 8px 8px 0 var(--copper-deep), 0 0 40px rgba(245,200,66,.3);
+    letter-spacing: -0.02em;
+  }
+  .giveaway-sym {
+    font-family: 'Fraunces', serif; font-style: italic; font-size: 24px;
+    color: var(--copper-light); display: block; margin-top: 2px;
+  }
+  .giveaway-sub { font-size: 11px; color: #c8b89a; margin-top: 10px; }
+
+  .form-group { margin-bottom: 12px; }
+  .form-group label { display: block; font-size: 10px; text-transform: uppercase; letter-spacing: .08em; color: var(--hint); margin-bottom: 6px; }
+  .form-group input {
+    width: 100%; padding: 12px 14px;
+    background: var(--secondary-bg); color: var(--text);
+    border: 1px solid rgba(182,86,47,.4); outline: none;
+    font-family: 'Space Mono', monospace; font-size: 13px;
+    transition: border-color .15s;
+  }
+  .form-group input:focus { border-color: var(--copper); }
+  .form-group input::placeholder { color: var(--hint); }
+
+  .btn {
+    width: 100%; padding: 14px;
+    background: var(--copper); color: #fff7ea;
+    border: none; font-family: 'Space Mono', monospace;
+    font-size: 12px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
+    cursor: pointer;
+    box-shadow: 4px 4px 0 var(--copper-deep);
+    transition: transform .15s, box-shadow .15s;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .btn:active { transform: translate(2px,2px); box-shadow: 2px 2px 0 var(--copper-deep); }
+  .form-success {
+    display: none; padding: 12px; margin-top: 10px;
+    background: rgba(92,107,79,.2); border: 1px solid var(--moss, #5c6b4f);
+    font-size: 12px; color: #9aba8c; text-align: center;
+  }
+
+  /* ── TOKENOMICS ── */
+  .token-row {
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,.06);
+  }
+  .token-row:last-child { border-bottom: none; }
+  .token-bar-wrap { flex: 1; height: 8px; background: rgba(255,255,255,.08); border-radius: 0; }
+  .token-bar { height: 100%; transition: width .6s ease; }
+  .token-pct { font-family: 'Fraunces', serif; font-weight: 700; font-size: 18px; color: var(--copper-light); min-width: 42px; }
+  .token-name { font-size: 11px; color: var(--hint); min-width: 80px; }
+  .supply-note {
+    background: var(--secondary-bg); padding: 16px; margin-top: 16px;
+    border-left: 3px solid var(--copper);
+  }
+  .supply-note .big { font-family: 'Fraunces', serif; font-size: 28px; font-weight: 700; color: var(--copper-light); }
+  .supply-note p { font-size: 11px; color: var(--hint); margin-top: 4px; }
+
+  /* ── ROADMAP ── */
+  .phase-card {
+    background: var(--secondary-bg);
+    border-left: 3px solid var(--copper);
+    padding: 14px 16px; margin-bottom: 12px;
+    position: relative;
+  }
+  .phase-num {
+    position: absolute; top: -10px; left: 12px;
+    background: var(--copper); color: #fff7ea;
+    font-family: 'Fraunces', serif; font-weight: 900; font-size: 12px;
+    padding: 2px 8px; box-shadow: 2px 2px 0 var(--copper-deep);
+  }
+  .phase-when { font-size: 9px; text-transform: uppercase; letter-spacing: .1em; color: var(--copper-light); margin-top: 8px; }
+  .phase-title { font-family: 'Fraunces', serif; font-size: 16px; margin: 2px 0 4px; }
+  .phase-desc { font-size: 11px; color: var(--hint); }
+
+  /* ── FLOATING PARTICLE ── */
+  .particle {
+    position: fixed; pointer-events: none; z-index: 9999;
+    font-family: 'Fraunces', serif; font-weight: 900; font-size: 18px;
+    color: var(--copper-light); text-shadow: 1px 1px 0 var(--copper-deep);
+    animation: floatUp .9s ease-out forwards;
+  }
+  @keyframes floatUp{
+    0%{opacity:1;transform:translateY(0) scale(1);}
+    60%{opacity:1;transform:translateY(-55px) scale(1.2);}
+    100%{opacity:0;transform:translateY(-90px) scale(.8);}
+  }
+
+  /* ── SECTION LABEL ── */
+  .sec-label { font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: var(--copper); margin-bottom: 4px; }
+  .sec-title { font-family: 'Fraunces', serif; font-size: 22px; font-weight: 700; margin-bottom: 16px; color: var(--text); }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div class="eyebrow">Ethereum ERC-20 · Pre-launch</div>
+  <h1 class="logo">Danno<br><span class="sym">DNO</span></h1>
+</div>
+
+<!-- COIN -->
+<div class="coin-wrap">
+  <div class="coin-scene" id="coinScene" onclick="tapCoin(event)">
+    <div class="coin-inner" id="coinInner">
+      <div class="ring ring-1"></div>
+      <div class="ring ring-2"></div>
+      <div class="ring ring-3"></div>
+      <div class="face front"><span class="g">D</span></div>
+      <div class="face back"><span class="g">N</span></div>
+    </div>
+  </div>
+  <div class="tap-info">
+    <div class="tap-hint">👆 Tap the coin</div>
+    <div class="tap-count" id="tapCount">0 taps</div>
+  </div>
+</div>
+
+<!-- TABS -->
+<div class="tabs">
+  <div class="tab active" onclick="showTab('stats')">📊 Stats</div>
+  <div class="tab" onclick="showTab('giveaway')">🎁 Giveaway</div>
+  <div class="tab" onclick="showTab('tokenomics')">📈 Tokens</div>
+  <div class="tab" onclick="showTab('roadmap')">🗺 Roadmap</div>
+</div>
+
+<!-- STATS PANEL -->
+<div class="panel active" id="panel-stats">
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="label">Giveaway entries</div>
+      <div class="value" id="statEntries">—</div>
+      <div class="sub">and counting</div>
+    </div>
+    <div class="stat-card">
+      <div class="label">Page likes</div>
+      <div class="value" id="statLikes">—</div>
+      <div class="sub">total</div>
+    </div>
+    <div class="stat-card">
+      <div class="label">Giveaway pool</div>
+      <div class="value">50M</div>
+      <div class="sub">DNO tokens</div>
+    </div>
+    <div class="stat-card">
+      <div class="label">Total supply</div>
+      <div class="value">1B</div>
+      <div class="sub">DNO fixed</div>
+    </div>
+  </div>
+  <div class="supply-note">
+    <div class="big">Pre-launch</div>
+    <p>Contract pending deployment. Stats update live as entries come in.</p>
+  </div>
+</div>
+
+<!-- GIVEAWAY PANEL -->
+<div class="panel" id="panel-giveaway">
+  <div class="giveaway-hero">
+    <div class="giveaway-badge">🔥 Official Giveaway — Live Now</div>
+    <div class="giveaway-amount">50,000,000<span class="giveaway-sym">DNO</span></div>
+    <p class="giveaway-sub">5% of total supply — distributed to early community members before public sale.</p>
+  </div>
+
+  <div class="form-group">
+    <label>Your email</label>
+    <input type="email" id="emailInput" placeholder="your@email.com" autocomplete="email">
+  </div>
+  <button class="btn" onclick="submitEntry()">Enter Giveaway →</button>
+  <div class="form-success" id="formSuccess">✓ You're on the list! We'll reach out before the drop.</div>
+</div>
+
+<!-- TOKENOMICS PANEL -->
+<div class="panel" id="panel-tokenomics">
+  <div class="sec-label">Distribution</div>
+  <div class="sec-title">Tokenomics</div>
+  <div class="token-row">
+    <div class="token-name">Public sale</div>
+    <div class="token-bar-wrap"><div class="token-bar" style="width:40%;background:var(--copper);"></div></div>
+    <div class="token-pct">40%</div>
+  </div>
+  <div class="token-row">
+    <div class="token-name">Liquidity</div>
+    <div class="token-bar-wrap"><div class="token-bar" style="width:25%;background:#5c6b4f;"></div></div>
+    <div class="token-pct">25%</div>
+  </div>
+  <div class="token-row">
+    <div class="token-name">Treasury</div>
+    <div class="token-bar-wrap"><div class="token-bar" style="width:20%;background:#8a6a3f;"></div></div>
+    <div class="token-pct">20%</div>
+  </div>
+  <div class="token-row">
+    <div class="token-name">Team</div>
+    <div class="token-bar-wrap"><div class="token-bar" style="width:15%;background:#4a473d;"></div></div>
+    <div class="token-pct">15%</div>
+  </div>
+  <div class="supply-note" style="margin-top:16px;">
+    <div class="big">1,000,000,000</div>
+    <p>Total fixed supply. No further minting after deployment.</p>
+    <p style="margin-top:6px;">Team locked 12 months · vests over next 12 · Liquidity locked at launch.</p>
+  </div>
+</div>
+
+<!-- ROADMAP PANEL -->
+<div class="panel" id="panel-roadmap">
+  <div class="sec-label">Rollout</div>
+  <div class="sec-title">Roadmap</div>
+  <div class="phase-card">
+    <div class="phase-num">01</div>
+    <div class="phase-when">Foundation</div>
+    <div class="phase-title">Contract & audit</div>
+    <p class="phase-desc">Finalize ERC-20 contract, third-party audit, publish on Etherscan.</p>
+  </div>
+  <div class="phase-card">
+    <div class="phase-num">02</div>
+    <div class="phase-when">Liquidity</div>
+    <div class="phase-title">Deployment & DEX listing</div>
+    <p class="phase-desc">Deploy contract, lock liquidity, list on a decentralized exchange.</p>
+  </div>
+  <div class="phase-card">
+    <div class="phase-num">03</div>
+    <div class="phase-when">Growth</div>
+    <div class="phase-title">Community & utility</div>
+    <p class="phase-desc">Expand holder base, ship first utility, open governance discussions.</p>
+  </div>
+  <div class="phase-card">
+    <div class="phase-num">04</div>
+    <div class="phase-when">Expansion</div>
+    <div class="phase-title">Exchange listings</div>
+    <p class="phase-desc">Pursue centralised exchange listings and broader partnerships.</p>
+  </div>
+</div>
+
+<script>
+  /* ── Telegram WebApp init ── */
+  const tg = window.Telegram && window.Telegram.WebApp;
+  if (tg) {
+    tg.ready();
+    tg.expand();
+  }
+
+  /* ── Tabs ── */
+  function showTab(id) {
+    document.querySelectorAll('.tab').forEach((t, i) => {
+      t.classList.toggle('active', ['stats','giveaway','tokenomics','roadmap'][i] === id);
+    });
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    document.getElementById('panel-' + id).classList.add('active');
+  }
+
+  /* ── Live stats ── */
+  function loadStats() {
+    fetch('/stats')
+      .then(r => r.json())
+      .then(d => {
+        document.getElementById('statEntries').textContent = d.entries;
+        document.getElementById('statLikes').textContent   = d.likes;
+      })
+      .catch(() => {});
+  }
+  loadStats();
+  setInterval(loadStats, 10000);
+
+  /* ── Coin tap ── */
+  var taps = 0;
+  function tapCoin(e) {
+    taps++;
+    document.getElementById('tapCount').textContent = taps + ' tap' + (taps === 1 ? '' : 's');
+    var ci = document.getElementById('coinInner');
+    ci.classList.remove('tap');
+    void ci.offsetWidth;
+    ci.classList.add('tap');
+    ci.addEventListener('animationend', function h(ev) {
+      if (ev.animationName === 'tapPop') { ci.classList.remove('tap'); ci.removeEventListener('animationend', h); }
+    });
+    var p = document.createElement('div');
+    p.className = 'particle';
+    p.textContent = '+1 DNO';
+    p.style.left = e.clientX - 24 + 'px';
+    p.style.top  = e.clientY - 10 + 'px';
+    document.body.appendChild(p);
+    p.addEventListener('animationend', () => p.remove());
+  }
+
+  /* ── Giveaway entry ── */
+  function submitEntry() {
+    var email = document.getElementById('emailInput').value.trim();
+    if (!email || !email.includes('@')) {
+      if (tg) tg.showAlert('Please enter a valid email address.');
+      return;
+    }
+    fetch('/entry', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ email: email,
+        telegram_user: tg ? (tg.initDataUnsafe.user || {}) : {} })
+    })
+    .then(r => r.json())
+    .then(() => {
+      document.getElementById('formSuccess').style.display = 'block';
+      document.getElementById('emailInput').value = '';
+      if (tg) tg.HapticFeedback && tg.HapticFeedback.notificationOccurred('success');
+      loadStats();
+    })
+    .catch(() => {
+      document.getElementById('formSuccess').style.display = 'block';
+    });
+  }
+</script>
+</body>
+</html>

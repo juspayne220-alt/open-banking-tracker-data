@@ -5,8 +5,9 @@ const cors        = require('cors');
 const fs          = require('fs');
 const path        = require('path');
 
-const TOKEN = process.env.BOT_TOKEN;
-const PORT  = process.env.PORT || 3000;
+const TOKEN   = process.env.BOT_TOKEN;
+const PORT    = process.env.PORT || 3000;
+const APP_URL = process.env.APP_URL || `http://localhost:${PORT}`;
 
 if (!TOKEN) {
   console.error('❌  BOT_TOKEN is missing. Add it to your .env file.');
@@ -43,7 +44,10 @@ app.post('/like', (req, res) => {
 
 app.get('/health', (_req, res) => res.json({ status: 'ok' }));
 
-app.listen(PORT, () => console.log(`✅  API running on port ${PORT}`));
+// Serve the Mini App
+app.use(express.static(path.join(__dirname, 'miniapp')));
+
+app.listen(PORT, () => console.log(`✅  API + Mini App running on port ${PORT}`));
 
 /* ── Telegram bot ── */
 const bot = new TelegramBot(TOKEN, { polling: true });
@@ -71,7 +75,12 @@ I'll keep you up to date with live stats, tokenomics, and the giveaway. Pick a c
 
 bot.onText(/\/start/, msg => {
   bot.sendMessage(msg.chat.id, WELCOME(msg.from.first_name), {
-    parse_mode: 'Markdown', ...keyboard
+    parse_mode: 'Markdown',
+    reply_markup: {
+      inline_keyboard: [[
+        { text: '🚀 Open DNO App', web_app: { url: APP_URL } }
+      ]]
+    }
   });
 });
 
