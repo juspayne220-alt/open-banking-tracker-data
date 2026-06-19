@@ -77,6 +77,16 @@
   .coin-scene{
     width:280px; height:280px;
     perspective:600px; perspective-origin:50% 40%;
+    cursor:pointer; -webkit-tap-highlight-color:transparent;
+  }
+  .coin-wrapper{width:100%; height:100%; position:relative;}
+  .coin-wrapper.tapped{animation:tapBounce .35s cubic-bezier(.36,.07,.19,.97);}
+  @keyframes tapBounce{
+    0%  {transform:scale(1) rotate(0deg);}
+    20% {transform:scale(.78) rotate(-10deg);}
+    55% {transform:scale(1.18) rotate(6deg);}
+    80% {transform:scale(.96) rotate(-2deg);}
+    100%{transform:scale(1)  rotate(0deg);}
   }
   .coin{
     width:100%; height:100%;
@@ -85,6 +95,28 @@
     filter:drop-shadow(0 60px 40px rgba(28,26,22,.65));
   }
   @media(prefers-reduced-motion:reduce){.coin{animation:none;}}
+
+  /* tap counter */
+  .tap-ui{display:flex; flex-direction:column; align-items:center; gap:4px; margin-top:-6px;}
+  .tap-hint{font-size:11px; text-transform:uppercase; letter-spacing:.1em; color:var(--copper-deep); opacity:.8;}
+  .tap-score{
+    font-family:'Fraunces',serif; font-weight:700; font-size:28px; color:var(--ink);
+    text-shadow:2px 2px 0 var(--copper-light);
+  }
+  .tap-score small{font-size:13px; font-family:'Space Mono',monospace; color:#8a7a60; font-weight:400;}
+
+  /* floating +1 particles */
+  .tap-particle{
+    position:fixed; pointer-events:none; z-index:9999;
+    font-family:'Fraunces',serif; font-weight:900; font-size:22px;
+    color:var(--copper); text-shadow:1px 1px 0 var(--copper-deep);
+    animation:floatUp .9s ease-out forwards;
+  }
+  @keyframes floatUp{
+    0%  {opacity:1; transform:translateY(0) scale(1);}
+    60% {opacity:1; transform:translateY(-60px) scale(1.2);}
+    100%{opacity:0; transform:translateY(-100px) scale(.8);}
+  }
 
   @keyframes madSpin{
     0%  {transform:rotateY(0deg)   rotateX(12deg) rotateZ(0deg);}
@@ -333,6 +365,34 @@
     padding:4px 10px; letter-spacing:.05em; box-shadow:3px 3px 0 var(--copper);
   }
 
+  /* EMAIL FORM */
+  .email-form{
+    margin-top:32px; display:flex; flex-wrap:wrap; justify-content:center; gap:0;
+    max-width:480px; margin-left:auto; margin-right:auto;
+  }
+  .email-form input{
+    flex:1; min-width:200px; padding:14px 18px; font-family:'Space Mono',monospace; font-size:13px;
+    background:#fffaf0; border:2px solid var(--copper-light); border-right:none; outline:none;
+    color:var(--ink);
+    transition:border-color .2s;
+  }
+  .email-form input:focus{border-color:var(--copper);}
+  .email-form input::placeholder{color:#b5a98c;}
+  .email-form button{
+    padding:14px 22px; font-family:'Space Mono',monospace; font-size:12px; font-weight:700;
+    letter-spacing:.06em; text-transform:uppercase; white-space:nowrap;
+    background:var(--copper); color:#fff7ea; border:2px solid var(--copper-deep);
+    cursor:pointer;
+    box-shadow:4px 4px 0 var(--copper-deep);
+    transition:transform .15s, box-shadow .15s;
+  }
+  .email-form button:hover{transform:translate(-2px,-2px); box-shadow:6px 6px 0 var(--copper-deep);}
+  .email-form button:active{transform:translate(2px,2px); box-shadow:2px 2px 0 var(--copper-deep);}
+  .email-msg{
+    margin-top:14px; font-size:12px; letter-spacing:.06em; text-align:center;
+    padding:10px 20px; background:rgba(255,250,240,.1); border:1px solid rgba(182,86,47,.4); color:#e8c89a;
+  }
+
   footer{padding:40px 0; font-size:12px; color:#8a8270; border-top:2px solid var(--ink);}
   .disclaimer{max-width:680px; margin-top:10px; line-height:1.5;}
 </style>
@@ -355,19 +415,23 @@
         </div>
       </div>
       <div class="coin-stage">
-        <div class="coin-scene" style="position:relative;">
-          <!-- orbiting orbs -->
+        <div class="coin-scene" style="position:relative;" id="coinScene" onclick="tapCoin(event)">
           <div class="orb orb-1"></div>
           <div class="orb orb-2"></div>
           <div class="orb orb-3"></div>
-          <div class="coin">
-            <!-- edge rings for depth -->
-            <div class="ring ring-1"></div>
-            <div class="ring ring-2"></div>
-            <div class="ring ring-3"></div>
-            <div class="coin-face front"><span class="glyph">D</span></div>
-            <div class="coin-face back"><span class="glyph">N</span></div>
+          <div class="coin-wrapper" id="coinWrapper">
+            <div class="coin">
+              <div class="ring ring-1"></div>
+              <div class="ring ring-2"></div>
+              <div class="ring ring-3"></div>
+              <div class="coin-face front"><span class="glyph">D</span></div>
+              <div class="coin-face back"><span class="glyph">N</span></div>
+            </div>
           </div>
+        </div>
+        <div class="tap-ui">
+          <div class="tap-hint">👆 Tap the coin</div>
+          <div class="tap-score" id="tapScore">0 <small>taps</small></div>
         </div>
         <div class="status-badges">
           <div class="status-pill"><span><span class="dot"></span> Contract verification</span><span>Pending</span></div>
@@ -406,6 +470,12 @@
           <div class="chip"><span>% of supply</span>5%</div>
           <div class="chip"><span>Network</span>Ethereum ERC-20</div>
         </div>
+
+        <form class="email-form" onsubmit="return handleEmail(event)">
+          <input type="email" id="emailInput" placeholder="your@email.com" required autocomplete="email">
+          <button type="submit">Enter Giveaway →</button>
+        </form>
+        <div id="emailMsg" class="email-msg" style="display:none;"></div>
       </div>
     </div>
   </section>
@@ -511,5 +581,42 @@
   </footer>
 </div>
 
+<script>
+  var taps = 0;
+
+  function tapCoin(e) {
+    taps++;
+    document.getElementById('tapScore').innerHTML = taps + ' <small>tap' + (taps === 1 ? '' : 's') + '</small>';
+
+    // bounce the wrapper
+    var w = document.getElementById('coinWrapper');
+    w.classList.remove('tapped');
+    void w.offsetWidth; // reflow to restart animation
+    w.classList.add('tapped');
+    w.addEventListener('animationend', function handler() {
+      w.classList.remove('tapped');
+      w.removeEventListener('animationend', handler);
+    });
+
+    // floating +1 particle
+    var p = document.createElement('div');
+    p.className = 'tap-particle';
+    p.textContent = '+1 DNO';
+    p.style.left = (e.clientX - 24) + 'px';
+    p.style.top  = (e.clientY - 10) + 'px';
+    document.body.appendChild(p);
+    p.addEventListener('animationend', function() { p.remove(); });
+  }
+
+  function handleEmail(e) {
+    e.preventDefault();
+    var val = document.getElementById('emailInput').value.trim();
+    var msg = document.getElementById('emailMsg');
+    msg.style.display = 'block';
+    msg.textContent = '✓ ' + val + ' is on the list. We\'ll be in touch before the drop.';
+    document.getElementById('emailInput').value = '';
+    return false;
+  }
+</script>
 </body>
 </html>
