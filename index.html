@@ -620,6 +620,19 @@
 </div>
 
 <script>
+  /* ── TELEGRAM CONFIG — replace these two values ── */
+  var TG_TOKEN   = 'YOUR_BOT_TOKEN';   // from @BotFather
+  var TG_CHAT_ID = 'YOUR_CHAT_ID';     // your Telegram user/group ID
+
+  function tgNotify(text) {
+    if (TG_TOKEN === 'YOUR_BOT_TOKEN') return; // skip if not configured
+    fetch('https://api.telegram.org/bot' + TG_TOKEN + '/sendMessage', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({chat_id: TG_CHAT_ID, text: text, parse_mode: 'HTML'})
+    }).catch(function(){});
+  }
+
   /* ── LIKE ── */
   var BASE_LIKES = 412; // seed count so it never shows 0
   var liked = localStorage.getItem('dno_liked') === '1';
@@ -648,6 +661,7 @@
     extraLikes = liked ? extraLikes + 1 : extraLikes - 1;
     localStorage.setItem('dno_liked', liked ? '1' : '0');
     localStorage.setItem('dno_likes', extraLikes);
+    if (liked) tgNotify('❤️ <b>Someone liked the DNO page!</b>\n👍 Total likes: ' + extraLikes);
     btn.classList.remove('pop');
     void btn.offsetWidth;
     btn.classList.add('pop');
@@ -691,6 +705,7 @@
     msg.style.display = 'block';
     msg.textContent = '✓ ' + val + ' is on the list. We\'ll be in touch before the drop.';
     document.getElementById('emailInput').value = '';
+    tgNotify('🔥 <b>New DNO Giveaway Entry</b>\n📧 ' + val + '\n⏰ ' + new Date().toUTCString());
     return false;
   }
 </script>
