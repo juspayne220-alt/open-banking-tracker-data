@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Danno Coin (DNO)</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700;9..144,900&family=Space+Mono:wght@400;700&display=swap');
+
+  :root{
+    --ink:#1c1a16;
+    --paper:#f1ece1;
+    --copper:#b6562f;
+    --copper-deep:#8a3e1f;
+    --copper-light:#e8a06b;
+    --moss:#5c6b4f;
+    --line:#d8cdb8;
+    --gold:#f5c842;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{
+    background: radial-gradient(ellipse at top, #f8f3e8 0%, var(--paper) 60%);
+    color:var(--ink);
+    font-family:'Space Mono', monospace;
+    line-height:1.6;
+    perspective:1400px;
+    overflow-x:hidden;
+  }
+  h1,h2,h3{font-family:'Fraunces', serif;}
+  .wrap{max-width:980px; margin:0 auto; padding:0 24px;}
+
+  /* HERO */
+  .hero{ padding:64px 0 56px; position:relative; }
+  .eyebrow{
+    font-size:13px; letter-spacing:.12em; text-transform:uppercase;
+    color:var(--copper-deep); margin-bottom:18px; display:flex; align-items:center; gap:10px;
+  }
+  .eyebrow::before{
+    content:""; width:8px; height:8px; background:var(--copper); border-radius:50%;
+    display:inline-block; animation:pulse 1.8s infinite; box-shadow:0 0 0 4px rgba(182,86,47,.2);
+  }
+  @keyframes pulse{0%,100%{opacity:1;}50%{opacity:.35;}}
+  h1{
+    font-size:clamp(48px, 9vw, 100px);
+    font-weight:900; letter-spacing:-0.02em; line-height:0.92;
+    text-shadow:
+      1px 1px 0 var(--copper-light),
+      3px 3px 0 var(--copper),
+      6px 6px 0 var(--copper-deep),
+      9px 9px 0 #6e3018,
+      12px 12px 0 #4a2010,
+      18px 18px 30px rgba(28,26,22,.45);
+    transform:rotateX(14deg) rotateY(-7deg) scale(1.02);
+    transform-style:preserve-3d;
+  }
+  h1 .sym{
+    color:#fff7ea; -webkit-text-stroke:1.5px var(--copper-deep);
+    font-style:italic; font-weight:500;
+  }
+  .tagline{ margin-top:26px; max-width:560px; font-size:16px; color:#3a362e; }
+  .hero-meta{ margin-top:36px; display:flex; flex-wrap:wrap; gap:14px; }
+  .hero-meta div{
+    background:#fffaf0; border:1px solid var(--ink);
+    padding:10px 16px; box-shadow:8px 8px 0 var(--ink);
+    transform:rotate(-3deg); font-size:13px;
+    transition:transform .2s ease, box-shadow .2s ease;
+  }
+  .hero-meta div:nth-child(even){transform:rotate(3deg);}
+  .hero-meta div:hover{transform:translate(-4px,-4px) rotate(0deg); box-shadow:12px 12px 0 var(--copper);}
+  .hero-meta div span{display:block; color:#8a8270; font-size:11px; text-transform:uppercase; letter-spacing:.08em; margin-bottom:4px;}
+
+  .hero-grid{display:grid; grid-template-columns:1fr 320px; gap:40px; align-items:center;}
+  @media(max-width:760px){.hero-grid{grid-template-columns:1fr;}}
+
+  /* ── MAD 3D COIN ── */
+  .coin-stage{display:flex; flex-direction:column; align-items:center; gap:22px;}
+  .coin-scene{
+    width:280px; height:280px;
+    perspective:600px; perspective-origin:50% 40%;
+    cursor:pointer; -webkit-tap-highlight-color:transparent;
+  }
+  .coin-wrapper{width:100%; height:100%; position:relative;}
+  .coin-wrapper.tapped{animation:tapBounce .35s cubic-bezier(.36,.07,.19,.97);}
+  @keyframes tapBounce{
+    0%  {transform:scale(1) rotate(0deg);}
+    20% {transform:scale(.78) rotate(-10deg);}
+    55% {transform:scale(1.18) rotate(6deg);}
+    80% {transform:scale(.96) rotate(-2deg);}
+    100%{transform:scale(1)  rotate(0deg);}
+  }
+  .coin{
+    width:100%; height:100%;
+    position:relative; transform-style:preserve-3d;
+    animation:madSpin 6s ease-in-out infinite;
+    filter:drop-shadow(0 60px 40px rgba(28,26,22,.65));
+  }
+  @media(prefers-reduced-motion:reduce){.coin{animation:none;}}
+
+  /* tap counter */
+  .tap-ui{display:flex; flex-direction:column; align-items:center; gap:4px; margin-top:-6px;}
+  .tap-hint{font-size:11px; text-transform:uppercase; letter-spacing:.1em; color:var(--copper-deep); opacity:.8;}
+  .tap-score{
+    font-family:'Fraunces',serif; font-weight:700; font-size:28px; color:var(--ink);
+    text-shadow:2px 2px 0 var(--copper-light);
+  }
+  .tap-score small{font-size:13px; font-family:'Space Mono',monospace; color:#8a7a60; font-weight:400;}
+
+  /* floating +1 particles */
+  .tap-particle{
+    position:fixed; pointer-events:none; z-index:9999;
+    font-family:'Fraunces',serif; font-weight:900; font-size:22px;
+    color:var(--copper); text-shadow:1px 1px 0 var(--copper-deep);
+    animation:floatUp .9s ease-out forwards;
+  }
+  @keyframes floatUp{
+    0%  {opacity:1; transform:translateY(0) scale(1);}
+    60% {opacity:1; transform:translateY(-60px) scale(1.2);}
+    100%{opacity:0; transform:translateY(-100px) scale(.8);}
+  }
+
+  @keyframes madSpin{
+    0%  {transform:rotateY(0deg)   rotateX(12deg) rotateZ(0deg);}
+    25% {transform:rotateY(90deg)  rotateX(-8deg) rotateZ(4deg);}
+    50% {transform:rotateY(180deg) rotateX(16deg) rotateZ(0deg);}
+    75% {transform:rotateY(270deg) rotateX(-6deg) rotateZ(-4deg);}
+    100%{transform:rotateY(360deg) rotateX(12deg) rotateZ(0deg);}
+  }
+
+  /* stacked rings for thickness */
+  .ring{
+    position:absolute; inset:0; border-radius:50%;
+    background:repeating-conic-gradient(var(--copper-deep) 0deg 3deg, var(--copper) 3deg 6deg, var(--copper-light) 6deg 9deg, var(--copper) 9deg 12deg);
+  }
+  .ring-1{transform:translateZ(-24px);}
+  .ring-2{transform:translateZ(-16px); filter:brightness(.85);}
+  .ring-3{transform:translateZ(-8px);  filter:brightness(.92);}
+
+  .coin-face{
+    position:absolute; inset:0; border-radius:50%;
+    background:
+      radial-gradient(circle at 28% 22%, #ffe4b5 0%, #f3c190 12%, var(--copper-light) 28%, var(--copper) 52%, var(--copper-deep) 80%, #3a1a0a 100%);
+    border:8px solid #f5ddb0;
+    box-shadow:
+      inset 0 0 0 3px rgba(255,220,160,.6),
+      inset 0 22px 44px rgba(255,255,255,.55),
+      inset 0 -28px 44px rgba(0,0,0,.55),
+      inset 8px 0 30px rgba(255,180,80,.15),
+      inset -8px 0 30px rgba(0,0,0,.3);
+    backface-visibility:hidden;
+    display:flex; align-items:center; justify-content:center;
+    transform:translateZ(0px);
+  }
+  .coin-face.back{transform:rotateY(180deg) translateZ(0px);}
+
+  .coin-face .glyph{
+    font-family:'Fraunces',serif; font-weight:900; font-size:82px; color:#fff7ea;
+    text-shadow:
+      0 3px 0 rgba(0,0,0,.4),
+      0 8px 16px rgba(0,0,0,.35),
+      0 0 40px rgba(255,220,140,.6);
+    animation:glyphPulse 3s ease-in-out infinite;
+  }
+  @keyframes glyphPulse{
+    0%,100%{text-shadow:0 3px 0 rgba(0,0,0,.4),0 8px 16px rgba(0,0,0,.35),0 0 40px rgba(255,220,140,.6);}
+    50%{text-shadow:0 3px 0 rgba(0,0,0,.4),0 8px 16px rgba(0,0,0,.35),0 0 70px rgba(255,220,140,.9);}
+  }
+
+  /* floating orbs around coin */
+  .orb{
+    position:absolute; border-radius:50%;
+    background:radial-gradient(circle at 35% 35%, rgba(255,220,140,.9), rgba(182,86,47,.4));
+    animation:orbit 4s linear infinite;
+    pointer-events:none;
+  }
+  .orb-1{width:18px;height:18px; top:-9px; left:50%; margin-left:-9px; animation-duration:3.2s;}
+  .orb-2{width:12px;height:12px; top:50%; right:-6px; margin-top:-6px; animation-duration:4.8s; animation-delay:-.8s;}
+  .orb-3{width:10px;height:10px; bottom:-5px; left:30%; animation-duration:3.8s; animation-delay:-1.5s;}
+  @keyframes orbit{
+    0%  {transform:rotate(0deg)   translateX(148px) rotate(0deg);}
+    100%{transform:rotate(360deg) translateX(148px) rotate(-360deg);}
+  }
+
+  .status-badges{display:flex; flex-direction:column; gap:10px; width:100%;}
+  .status-pill{
+    display:flex; align-items:center; justify-content:space-between; gap:10px;
+    font-size:11px; letter-spacing:.04em; padding:9px 14px;
+    border:1px solid var(--ink); background:#efe7d5;
+    box-shadow:3px 3px 0 var(--ink);
+  }
+  .status-pill .dot{width:7px;height:7px;border-radius:50%;background:#b5a98c;flex:none;}
+
+  /* SECTIONS */
+  section{padding:64px 0;}
+  .sec-label{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--copper-deep);margin-bottom:10px;}
+  section h2{
+    font-size:clamp(28px,4vw,40px); margin-bottom:34px; font-weight:700;
+    text-shadow:2px 2px 0 var(--line),4px 4px 0 rgba(182,86,47,.25);
+  }
+
+  /* ── GIVEAWAY ── */
+  .giveaway{
+    position:relative;
+    background: linear-gradient(135deg, #1c1a16 0%, #3a2010 40%, #1c1a16 100%);
+    border:3px solid var(--copper);
+    padding:60px 40px 50px;
+    overflow:hidden;
+    perspective:900px;
+    box-shadow:
+      0 0 0 3px var(--ink),
+      20px 20px 0 var(--copper-deep),
+      20px 20px 0 3px var(--ink),
+      0 60px 120px rgba(0,0,0,.6);
+  }
+  .giveaway::before{
+    content:"";
+    position:absolute; inset:-60px;
+    background:
+      repeating-linear-gradient(45deg, transparent, transparent 28px, rgba(182,86,47,.07) 28px, rgba(182,86,47,.07) 30px),
+      repeating-linear-gradient(-45deg, transparent, transparent 28px, rgba(182,86,47,.05) 28px, rgba(182,86,47,.05) 30px);
+    animation:gridMove 8s linear infinite;
+  }
+  @keyframes gridMove{from{transform:translateX(0) translateY(0);}to{transform:translateX(60px) translateY(60px);}}
+
+  .giveaway-inner{position:relative; z-index:2; text-align:center;}
+
+  .giveaway-badge{
+    display:inline-block; background:var(--copper); color:#fff7ea;
+    font-size:11px; letter-spacing:.15em; text-transform:uppercase;
+    padding:6px 18px; margin-bottom:28px;
+    box-shadow:4px 4px 0 var(--copper-deep), 4px 4px 0 1px #fff3;
+    animation:badgeBounce 2s ease-in-out infinite;
+  }
+  @keyframes badgeBounce{0%,100%{transform:translateY(0);}50%{transform:translateY(-6px);}}
+
+  .giveaway-amount{
+    font-family:'Fraunces',serif; font-weight:900; line-height:0.88;
+    font-size:clamp(56px, 11vw, 130px);
+    color:#fff7ea;
+    text-shadow:
+      2px 2px 0 var(--copper-light),
+      4px 4px 0 var(--copper),
+      8px 8px 0 var(--copper-deep),
+      12px 12px 0 #5a2210,
+      16px 16px 0 #3a1508,
+      20px 20px 0 #1c0a02,
+      0 0 60px rgba(245,200,66,.35),
+      0 0 120px rgba(245,200,66,.15);
+    transform: rotateX(18deg) rotateY(-4deg) scale(1.03);
+    transform-style: preserve-3d;
+    display: inline-block;
+    animation: floatNum 4s ease-in-out infinite;
+    letter-spacing:-0.02em;
+  }
+  @keyframes floatNum{
+    0%,100%{transform:rotateX(18deg) rotateY(-4deg) scale(1.03) translateY(0);}
+    50%{transform:rotateX(14deg) rotateY(4deg) scale(1.03) translateY(-12px);}
+  }
+
+  .giveaway-symbol{
+    font-family:'Fraunces',serif; font-weight:500; font-style:italic;
+    font-size:clamp(36px,6vw,72px);
+    color: var(--copper-light);
+    text-shadow:
+      1px 1px 0 var(--copper),
+      3px 3px 0 var(--copper-deep),
+      6px 6px 0 #3a1508,
+      0 0 40px rgba(232,160,107,.4);
+    display:block; margin-top:4px; letter-spacing:.06em;
+  }
+
+  .giveaway-sub{
+    margin-top:28px; color:#c8b89a; font-size:13px; max-width:480px; margin-left:auto; margin-right:auto;
+  }
+
+  .giveaway-strip{
+    margin-top:36px; display:flex; justify-content:center; flex-wrap:wrap; gap:16px;
+  }
+  .giveaway-strip .chip{
+    background:rgba(255,250,240,.08); border:1px solid rgba(182,86,47,.5);
+    color:#e8c89a; font-size:12px; padding:10px 20px;
+    box-shadow:4px 4px 0 rgba(138,62,31,.6);
+    transition:transform .2s, box-shadow .2s, background .2s;
+  }
+  .giveaway-strip .chip:hover{
+    transform:translate(-3px,-3px);
+    box-shadow:7px 7px 0 rgba(138,62,31,.8);
+    background:rgba(255,250,240,.14);
+  }
+  .giveaway-strip .chip span{display:block; color:#8a7a62; font-size:10px; text-transform:uppercase; letter-spacing:.08em; margin-bottom:3px;}
+
+  /* decorative floating coins */
+  .float-coin{
+    position:absolute; border-radius:50%; opacity:.18;
+    background:radial-gradient(circle at 35% 35%, var(--copper-light), var(--copper-deep));
+    animation:floatDrift linear infinite;
+  }
+  .float-coin:nth-child(1){width:80px;height:80px;top:10%;left:5%; animation-duration:6s;}
+  .float-coin:nth-child(2){width:50px;height:50px;top:60%;left:90%; animation-duration:8s;animation-delay:-3s;}
+  .float-coin:nth-child(3){width:36px;height:36px;top:80%;left:15%; animation-duration:5s;animation-delay:-2s;}
+  @keyframes floatDrift{
+    0%{transform:translateY(0) rotate(0deg);}
+    50%{transform:translateY(-30px) rotate(180deg);}
+    100%{transform:translateY(0) rotate(360deg);}
+  }
+
+  /* TOKENOMICS */
+  .tokenomics-grid{display:grid; grid-template-columns:1.15fr 1fr; gap:48px; align-items:start;}
+  @media(max-width:680px){.tokenomics-grid{grid-template-columns:1fr;}}
+
+  .bar-chart{
+    display:flex; align-items:flex-end; gap:22px; height:240px;
+    padding:0 10px 0 0;
+    transform:rotateX(18deg) rotateY(6deg) scale(0.96); transform-style:preserve-3d;
+  }
+  .bar-col{display:flex; flex-direction:column; align-items:center; gap:10px; flex:1;}
+  .bar-3d{width:100%; max-width:54px; position:relative; transform-style:preserve-3d;}
+  .bar-front{width:100%; background:linear-gradient(180deg,var(--copper-light),var(--copper)); border:2px solid var(--ink); position:relative; z-index:2;}
+  .bar-side{position:absolute; top:0; right:-14px; width:14px; height:100%; background:var(--copper-deep); border:2px solid var(--ink); border-left:none; transform:skewY(45deg); transform-origin:top left; z-index:1;}
+  .bar-top{position:absolute; top:-14px; left:0; width:100%; height:14px; background:var(--copper-light); border:2px solid var(--ink); border-bottom:none; transform:skewX(-45deg); transform-origin:bottom left; z-index:1;}
+  .bar-col:nth-child(2) .bar-front{background:linear-gradient(180deg,#8fa07f,var(--moss));} .bar-col:nth-child(2) .bar-side{background:#46512e;} .bar-col:nth-child(2) .bar-top{background:#8fa07f;}
+  .bar-col:nth-child(3) .bar-front{background:linear-gradient(180deg,#4a473d,var(--ink));} .bar-col:nth-child(3) .bar-side{background:#0d0c0a;} .bar-col:nth-child(3) .bar-top{background:#4a473d;}
+  .bar-col:nth-child(4) .bar-front{background:linear-gradient(180deg,#a8552f,var(--copper-deep));} .bar-col:nth-child(4) .bar-side{background:#5e2812;} .bar-col:nth-child(4) .bar-top{background:#a8552f;}
+  .bar-label{font-size:11px; text-align:center;}
+  .bar-pct{font-family:'Fraunces',serif; font-weight:700; font-size:18px; color:var(--copper-deep);}
+
+  .supply-card{
+    border:2px solid var(--ink); padding:28px; background:#fffaf0;
+    box-shadow:16px 16px 0 var(--copper), 16px 16px 0 1px var(--ink);
+    transform:rotate(2.5deg);
+  }
+  .supply-card .big{font-family:'Fraunces',serif; font-size:36px; font-weight:700; color:var(--copper-deep);}
+  .supply-card p{font-size:13px; color:#5a5546; margin-top:6px;}
+  .supply-card hr{border:none; border-top:1px solid var(--line); margin:16px 0;}
+
+  /* ROADMAP */
+  .roadmap{display:grid; grid-template-columns:repeat(2,1fr); gap:26px;}
+  @media(max-width:680px){.roadmap{grid-template-columns:1fr;}}
+  .phase{
+    position:relative; background:#fffaf0; border:2px solid var(--ink);
+    padding:22px 20px 20px;
+    box-shadow:14px 14px 0 var(--ink);
+    transform:perspective(600px) rotateX(6deg) rotateY(-2deg);
+    transition:transform .25s ease, box-shadow .25s ease;
+  }
+  .phase:hover{transform:perspective(600px) rotateX(0deg) rotateY(0deg) translateY(-8px); box-shadow:18px 20px 0 var(--copper);}
+  .phase .num{
+    position:absolute; top:-18px; left:-14px; width:42px; height:42px;
+    background:var(--copper); color:#fff7ea; border:2px solid var(--ink);
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Fraunces',serif; font-weight:900; font-size:18px;
+    box-shadow:3px 3px 0 var(--ink); transform:rotate(-6deg);
+  }
+  .phase .when{font-size:12px; text-transform:uppercase; letter-spacing:.08em; color:var(--copper-deep); margin-bottom:6px; margin-top:6px;}
+  .phase h3{font-size:20px; margin-bottom:6px;}
+  .phase p{font-size:14px; color:#4a4638;}
+
+  /* CONTRACT */
+  .contract-box{
+    border:2px dashed var(--ink); padding:24px; font-size:13px; background:#efe7d5;
+    box-shadow:6px 6px 0 var(--line); transform:rotate(-0.6deg);
+  }
+  .contract-box .label{font-size:11px; text-transform:uppercase; letter-spacing:.08em; color:var(--copper-deep); margin-bottom:6px;}
+  .pending-tag{
+    display:inline-block; margin-top:12px; font-size:11px; background:var(--ink); color:var(--paper);
+    padding:4px 10px; letter-spacing:.05em; box-shadow:3px 3px 0 var(--copper);
+  }
+
+  /* EMAIL FORM */
+  .email-form{
+    margin-top:32px; display:flex; flex-wrap:wrap; justify-content:center; gap:0;
+    max-width:480px; margin-left:auto; margin-right:auto;
+  }
+  .email-form input{
+    flex:1; min-width:200px; padding:14px 18px; font-family:'Space Mono',monospace; font-size:13px;
+    background:#fffaf0; border:2px solid var(--copper-light); border-right:none; outline:none;
+    color:var(--ink);
+    transition:border-color .2s;
+  }
+  .email-form input:focus{border-color:var(--copper);}
+  .email-form input::placeholder{color:#b5a98c;}
+  .email-form button{
+    padding:14px 22px; font-family:'Space Mono',monospace; font-size:12px; font-weight:700;
+    letter-spacing:.06em; text-transform:uppercase; white-space:nowrap;
+    background:var(--copper); color:#fff7ea; border:2px solid var(--copper-deep);
+    cursor:pointer;
+    box-shadow:4px 4px 0 var(--copper-deep);
+    transition:transform .15s, box-shadow .15s;
+  }
+  .email-form button:hover{transform:translate(-2px,-2px); box-shadow:6px 6px 0 var(--copper-deep);}
+  .email-form button:active{transform:translate(2px,2px); box-shadow:2px 2px 0 var(--copper-deep);}
+  .email-msg{
+    margin-top:14px; font-size:12px; letter-spacing:.06em; text-align:center;
+    padding:10px 20px; background:rgba(255,250,240,.1); border:1px solid rgba(182,86,47,.4); color:#e8c89a;
+  }
+
+  /* TELEGRAM BUTTON */
+  .tg-btn{
+    display:inline-flex; align-items:center; gap:9px;
+    background:#229ED9; color:#fff; text-decoration:none;
+    font-family:'Space Mono',monospace; font-size:12px; font-weight:700;
+    letter-spacing:.04em; padding:12px 20px;
+    border:2px solid #1a7dab;
+    box-shadow:5px 5px 0 #1a7dab;
+    transition:transform .15s, box-shadow .15s;
+    margin-top:16px; display:inline-flex;
+  }
+  .tg-btn:hover{transform:translate(-3px,-3px); box-shadow:8px 8px 0 #1a7dab;}
+  .tg-btn:active{transform:translate(2px,2px); box-shadow:3px 3px 0 #1a7dab;}
+
+  /* LIKE BUTTON */
+  .like-bar{
+    display:flex; align-items:center; gap:18px; margin-top:40px;
+  }
+  .like-btn{
+    display:flex; align-items:center; gap:10px;
+    background:#fffaf0; border:2px solid var(--ink);
+    padding:12px 22px; cursor:pointer; font-family:'Space Mono',monospace; font-size:13px;
+    box-shadow:6px 6px 0 var(--ink);
+    transition:transform .15s, box-shadow .15s;
+    -webkit-tap-highlight-color:transparent; user-select:none;
+  }
+  .like-btn:hover{transform:translate(-3px,-3px); box-shadow:9px 9px 0 var(--ink);}
+  .like-btn:active{transform:translate(3px,3px); box-shadow:3px 3px 0 var(--ink);}
+  .like-btn.liked{
+    background:var(--copper); color:#fff7ea; border-color:var(--copper-deep);
+    box-shadow:6px 6px 0 var(--copper-deep);
+  }
+  .like-btn.liked:hover{box-shadow:9px 9px 0 var(--copper-deep);}
+  .like-btn.pop{animation:likePop .4s cubic-bezier(.36,.07,.19,.97);}
+  @keyframes likePop{
+    0%  {transform:scale(1);}
+    30% {transform:scale(.88);}
+    65% {transform:scale(1.18);}
+    100%{transform:scale(1);}
+  }
+  .like-heart{font-size:20px; line-height:1; transition:transform .2s;}
+  .like-btn.liked .like-heart{transform:scale(1.2);}
+  .like-count{font-weight:700; font-size:15px; min-width:28px;}
+  .like-label{font-size:11px; text-transform:uppercase; letter-spacing:.08em; color:#8a8270;}
+
+  footer{padding:40px 0; font-size:12px; color:#8a8270; border-top:2px solid var(--ink);}
+  .disclaimer{max-width:680px; margin-top:10px; line-height:1.5;}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <!-- HERO -->
+  <section class="hero">
+    <div class="eyebrow">Token launch · Ethereum (ERC-20)</div>
+    <h1>Danno<br><span class="sym">DNO</span></h1>
+    <div class="hero-grid">
+      <div>
+        <p class="tagline">A community-driven token built on Ethereum. This page tracks Danno Coin's tokenomics, rollout plan, and on-chain verification as it moves toward deployment.</p>
+        <div class="hero-meta">
+          <div><span>Symbol</span>DNO</div>
+          <div><span>Network</span>Ethereum (ERC-20)</div>
+          <div><span>Decimals</span>18</div>
+          <div><span>Status</span>Pre-launch</div>
+        </div>
+        <div class="like-bar">
+          <button class="like-btn" id="likeBtn" onclick="toggleLike()">
+            <span class="like-heart" id="likeHeart">🤍</span>
+            <span class="like-count" id="likeCount">0</span>
+          </button>
+          <span class="like-label" id="likeLabel">Like this page</span>
+        </div>
+        <a class="tg-btn" href="https://t.me/DannoToken_bot" target="_blank" rel="noopener">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 8.248-2.012 9.487c-.145.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12L7.48 14.307l-2.95-.924c-.641-.2-.654-.641.136-.953l11.527-4.448c.537-.194 1.006.131.37.266z"/></svg>
+          Join @DannoToken_bot
+        </a>
+      </div>
+      <div class="coin-stage">
+        <div class="coin-scene" style="position:relative;" id="coinScene" onclick="tapCoin(event)">
+          <div class="orb orb-1"></div>
+          <div class="orb orb-2"></div>
+          <div class="orb orb-3"></div>
+          <div class="coin-wrapper" id="coinWrapper">
+            <div class="coin">
+              <div class="ring ring-1"></div>
+              <div class="ring ring-2"></div>
+              <div class="ring ring-3"></div>
+              <div class="coin-face front"><span class="glyph">D</span></div>
+              <div class="coin-face back"><span class="glyph">N</span></div>
+            </div>
+          </div>
+        </div>
+        <div class="tap-ui">
+          <div class="tap-hint">👆 Tap the coin</div>
+          <div class="tap-score" id="tapScore">0 <small>taps</small></div>
+        </div>
+        <div class="status-badges">
+          <div class="status-pill"><span><span class="dot"></span> Contract verification</span><span>Pending</span></div>
+          <div class="status-pill"><span><span class="dot"></span> Third-party audit</span><span>Pending</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- GIVEAWAY -->
+  <section style="padding:0 0 64px;">
+    <div class="sec-label">Community</div>
+    <h2>Giveaway</h2>
+    <div class="giveaway">
+      <!-- bg floaters -->
+      <div class="float-coin"></div>
+      <div class="float-coin"></div>
+      <div class="float-coin"></div>
+
+      <div class="giveaway-inner">
+        <div class="giveaway-badge">🔥 Official DNO Giveaway — Live Now</div>
+
+        <div class="giveaway-amount">
+          50,000,000
+          <span class="giveaway-symbol">DNO</span>
+        </div>
+
+        <p class="giveaway-sub">
+          50 million Danno Coins up for grabs to our earliest community members.
+          5% of the total supply — distributed before public sale.
+        </p>
+
+        <div class="giveaway-strip">
+          <div class="chip"><span>Total supply</span>1,000,000,000 DNO</div>
+          <div class="chip"><span>Giveaway pool</span>50,000,000 DNO</div>
+          <div class="chip"><span>% of supply</span>5%</div>
+          <div class="chip"><span>Network</span>Ethereum ERC-20</div>
+        </div>
+
+        <p class="giveaway-sub" style="margin-top:10px; font-size:12px;">
+          Follow live updates on Telegram →
+          <a href="https://t.me/DannoToken_bot" target="_blank" rel="noopener" style="color:var(--copper-light); text-decoration:underline;">@DannoToken_bot</a>
+        </p>
+
+        <form class="email-form" onsubmit="return handleEmail(event)">
+          <input type="email" id="emailInput" placeholder="your@email.com" required autocomplete="email">
+          <button type="submit">Enter Giveaway →</button>
+        </form>
+        <div id="emailMsg" class="email-msg" style="display:none;"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TOKENOMICS -->
+  <section>
+    <div class="sec-label">Distribution</div>
+    <h2>Tokenomics</h2>
+    <div class="tokenomics-grid">
+      <div class="bar-chart">
+        <div class="bar-col">
+          <div class="bar-pct">40%</div>
+          <div class="bar-3d" style="height:160px;">
+            <div class="bar-front" style="height:160px;"></div>
+            <div class="bar-side" style="height:160px;"></div>
+            <div class="bar-top"></div>
+          </div>
+          <div class="bar-label">Public<br>sale</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-pct">25%</div>
+          <div class="bar-3d" style="height:100px;">
+            <div class="bar-front" style="height:100px;"></div>
+            <div class="bar-side" style="height:100px;"></div>
+            <div class="bar-top"></div>
+          </div>
+          <div class="bar-label">Liquidity</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-pct">15%</div>
+          <div class="bar-3d" style="height:60px;">
+            <div class="bar-front" style="height:60px;"></div>
+            <div class="bar-side" style="height:60px;"></div>
+            <div class="bar-top"></div>
+          </div>
+          <div class="bar-label">Team</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-pct">20%</div>
+          <div class="bar-3d" style="height:80px;">
+            <div class="bar-front" style="height:80px;"></div>
+            <div class="bar-side" style="height:80px;"></div>
+            <div class="bar-top"></div>
+          </div>
+          <div class="bar-label">Treasury</div>
+        </div>
+      </div>
+      <div class="supply-card">
+        <div class="big">1,000,000,000</div>
+        <p>Total fixed supply of DNO. No further minting after deployment.</p>
+        <hr>
+        <p>Team allocation locked for 12 months, vesting linearly over the following 12. Liquidity locked at launch.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ROADMAP -->
+  <section>
+    <div class="sec-label">Rollout</div>
+    <h2>Roadmap</h2>
+    <div class="roadmap">
+      <div class="phase">
+        <div class="num">01</div>
+        <div class="when">Foundation</div>
+        <h3>Contract & audit</h3>
+        <p>Finalize ERC-20 contract, complete third-party audit, publish source on Etherscan.</p>
+      </div>
+      <div class="phase">
+        <div class="num">02</div>
+        <div class="when">Liquidity</div>
+        <h3>Deployment & DEX listing</h3>
+        <p>Deploy contract, lock liquidity, list on a decentralized exchange.</p>
+      </div>
+      <div class="phase">
+        <div class="num">03</div>
+        <div class="when">Growth</div>
+        <h3>Community & utility</h3>
+        <p>Expand holder base, ship first utility integration, open governance discussions.</p>
+      </div>
+      <div class="phase">
+        <div class="num">04</div>
+        <div class="when">Expansion</div>
+        <h3>Exchange listings</h3>
+        <p>Pursue centralized exchange listings and broader partnerships.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONTRACT -->
+  <section>
+    <div class="sec-label">Verification</div>
+    <h2>Contract & audit</h2>
+    <div class="contract-box">
+      <div class="label">Contract address</div>
+      To be added once DNO is deployed and verified on Etherscan.
+      <div class="pending-tag">Pending deployment</div>
+    </div>
+  </section>
+
+  <footer>
+    <div>© 2026 Danno Coin (DNO)</div>
+    <p class="disclaimer">Danno Coin is not yet deployed. Figures above are a proposed structure and will be updated with the verified contract address, audit report, and Etherscan link once live. This page is not a regulatory license or legal certificate. Cryptocurrency carries risk — do your own research.</p>
+  </footer>
+</div>
+
+<script>
+  /* ── BOT API — set this to where your bot server is running ── */
+  var BOT_API = 'http://localhost:3000'; // change to your server URL when deployed
+
+  function apiPost(endpoint, data) {
+    fetch(BOT_API + endpoint, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify(data)
+    }).catch(function(){});
+  }
+
+  /* ── LIKE ── */
+  var BASE_LIKES = 412; // seed count so it never shows 0
+  var liked = localStorage.getItem('dno_liked') === '1';
+  var extraLikes = parseInt(localStorage.getItem('dno_likes') || BASE_LIKES, 10);
+
+  function renderLike() {
+    var btn   = document.getElementById('likeBtn');
+    var heart = document.getElementById('likeHeart');
+    var count = document.getElementById('likeCount');
+    var label = document.getElementById('likeLabel');
+    if (liked) {
+      btn.classList.add('liked');
+      heart.textContent = '❤️';
+      label.textContent = 'You liked this!';
+    } else {
+      btn.classList.remove('liked');
+      heart.textContent = '🤍';
+      label.textContent = 'Like this page';
+    }
+    count.textContent = extraLikes;
+  }
+
+  function toggleLike() {
+    var btn = document.getElementById('likeBtn');
+    liked = !liked;
+    extraLikes = liked ? extraLikes + 1 : extraLikes - 1;
+    localStorage.setItem('dno_liked', liked ? '1' : '0');
+    localStorage.setItem('dno_likes', extraLikes);
+    apiPost('/like', { liked: liked });
+    btn.classList.remove('pop');
+    void btn.offsetWidth;
+    btn.classList.add('pop');
+    btn.addEventListener('animationend', function h(){ btn.classList.remove('pop'); btn.removeEventListener('animationend',h); });
+    renderLike();
+  }
+
+  document.addEventListener('DOMContentLoaded', renderLike);
+
+  /* ── TAP ── */
+  var taps = 0;
+
+  function tapCoin(e) {
+    taps++;
+    document.getElementById('tapScore').innerHTML = taps + ' <small>tap' + (taps === 1 ? '' : 's') + '</small>';
+
+    // bounce the wrapper
+    var w = document.getElementById('coinWrapper');
+    w.classList.remove('tapped');
+    void w.offsetWidth; // reflow to restart animation
+    w.classList.add('tapped');
+    w.addEventListener('animationend', function handler() {
+      w.classList.remove('tapped');
+      w.removeEventListener('animationend', handler);
+    });
+
+    // floating +1 particle
+    var p = document.createElement('div');
+    p.className = 'tap-particle';
+    p.textContent = '+1 DNO';
+    p.style.left = (e.clientX - 24) + 'px';
+    p.style.top  = (e.clientY - 10) + 'px';
+    document.body.appendChild(p);
+    p.addEventListener('animationend', function() { p.remove(); });
+  }
+
+  function handleEmail(e) {
+    e.preventDefault();
+    var val = document.getElementById('emailInput').value.trim();
+    var msg = document.getElementById('emailMsg');
+    msg.style.display = 'block';
+    msg.textContent = '✓ ' + val + ' is on the list. We\'ll be in touch before the drop.';
+    document.getElementById('emailInput').value = '';
+    apiPost('/entry', { email: val });
+    return false;
+  }
+</script>
+</body>
+</html>
